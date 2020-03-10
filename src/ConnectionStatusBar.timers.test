@@ -1,0 +1,51 @@
+import React from 'react';
+import ConnectionStatusBar from 'src/components/NewCcp/Tabs/VoiceTab/StatusBar/ConnectionStatusBar';
+import * as utils from 'src/utils/utils';
+import { mount } from 'enzyme';
+import { mockVoiceConnections } from 'src/../__mocks__/aws/connections.mock';
+import {
+   PhoneNumber,
+   TimerSpan,
+   CallStatus
+} from 'src/components/NewCcp/Tabs/VoiceTab/StatusBar/ConnnectionStatusBar.styled';
+
+PhoneNumber.displayName = 'PhoneNumber';
+TimerSpan.displayName = 'TimerSpan';
+CallStatus.displayName = 'CallStatus';
+
+jest.mock('src/utils/utils');
+jest.useFakeTimers();
+
+const connection = mockVoiceConnections()[0];
+
+const mountRender = () => {
+   return mount(<ConnectionStatusBar connection={connection} key="1" />);
+};
+
+describe('ConnectionStatusBar', () => {
+   afterEach(() => {
+      jest.clearAllMocks();
+      jest.clearAllTimers();
+   });
+   it('should set interval on mount', () => {
+      utils.msToTime = jest.fn();
+      const wrapper = mountRender();
+      expect(utils.msToTime).toHaveBeenCalledTimes(1);
+      expect(utils.msToTime).toBeCalledWith(connection.getStatusDuration());
+      expect(wrapper.find('PhoneNumber').text()).toBe(connection.getEndpoint().phoneNumber);
+      expect(wrapper.find('TimerSpan').text()).toBeDefined();
+      expect(wrapper.find('CallStatus').text()).toBe(connection.getStatus().type);
+   });
+   it('should update every 500 ms', () => {
+      utils.msToTime = jest.fn();
+      mountRender();
+      jest.advanceTimersByTime(500);
+      expect(utils.msToTime).toHaveBeenCalledTimes(3);
+   });
+   it('should call clearInterval on unmount', () => {
+      global.clearInterval = jest.fn();
+      const wrapper = mountRender();
+      wrapper.unmount();
+      expect(global.clearInterval).toHaveBeenCalledTimes(1);
+   });
+});

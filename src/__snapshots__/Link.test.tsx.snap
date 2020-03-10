@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Link Test useEffect 1`] = `ReactWrapper {}`;
+
+exports[`Link Test useEffect 2`] = `ReactWrapper {}`;
